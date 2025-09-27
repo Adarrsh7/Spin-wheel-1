@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spin to Know About Your Day!</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: linear-gradient(to top right, #6a11cb, #2575fc);
+      font-family: Arial, sans-serif;
+      color: white;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    .container {
+      text-align: center;
+      background: rgba(255,255,255,0.1);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    input {
+      display: block;
+      width: 250px;
+      margin: 10px auto;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      font-size: 16px;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      background: #ff4757;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    #wheelPage {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    #wheel-container {
+      position: relative;
+      width: 320px;
+      height: 320px;
+      margin-top: 20px;
+    }
+
+    #wheel {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 10px solid white;
+      overflow: hidden;
+      transform: rotate(0deg) rotateX(10deg);
+      transition: transform 4s cubic-bezier(0.33, 1, 0.68, 1);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+    }
+
+    .slice {
+      width: 50%;
+      height: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform-origin: 0% 0%;
+      clip-path: polygon(0% 0%, 100% 0%, 100% 100%);
+    }
+
+    #spinBtn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: none;
+      background: #ff4757;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+      z-index: 2;
+    }
+
+    #pointer {
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 12px solid transparent;
+      border-right: 12px solid transparent;
+      border-bottom: 20px solid #fff;
+      z-index: 3;
+    }
+
+    #result {
+      margin-top: 30px;
+      font-size: 20px;
+      font-weight: bold;
+      text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
+    }
+  </style>
+</head>
+<body>
+  <!-- Home Page -->
+  <div class="container" id="homePage">
+    <h1>Welcome to Spin Your Day!</h1>
+    <p>Please enter your details to continue:</p>
+    <input type="text" id="name" placeholder="Enter your name" required>
+    <input type="tel" id="phone" placeholder="Enter your phone number" required>
+    <button onclick="goToWheel()">Continue</button>
+  </div>
+
+  <!-- Wheel Page -->
+  <div id="wheelPage">
+    <h1>Spin to Know About Your Day!</h1>
+    <p id="welcome"></p>
+    <div id="wheel-container">
+      <div id="wheel"></div>
+      <div id="pointer"></div>
+      <button id="spinBtn">SPIN</button>
+    </div>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const wheel = document.getElementById("wheel");
+    const spinBtn = document.getElementById("spinBtn");
+    const result = document.getElementById("result");
+    const welcome = document.getElementById("welcome");
+
+    const suggestions = [
+      "Self-care 🛁",
+      "Work hard 💻",
+      "Family time 👨‍👩‍👦",
+      "Relax 😌",
+      "Exercise 🏋️",
+      "Learn something 📖"
+    ];
+
+    const colors = ["#ff7675", "#74b9ff", "#ffeaa7", "#fd79a8", "#e84393", "#fdcb6e"];
+    const sliceDeg = 360 / suggestions.length;
+
+    // Build wheel slices
+    suggestions.forEach((text, i) => {
+      const slice = document.createElement("div");
+      slice.className = "slice";
+      slice.style.background = colors[i];
+      slice.style.transform = `rotate(${i * sliceDeg}deg) skewY(${90 - sliceDeg}deg)`;
+      wheel.appendChild(slice);
+    });
+
+    let spinning = false;
+    let currentDeg = 0;
+
+    spinBtn.addEventListener("click", () => {
+      if (spinning) return;
+      spinning = true;
+      const randomSpin = 360 * 5 + Math.floor(Math.random() * 360);
+      currentDeg += randomSpin;
+      wheel.style.transform = `rotate(${currentDeg}deg) rotateX(10deg)`;
+
+      setTimeout(() => {
+        const actualDeg = currentDeg % 360;
+        const index = Math.floor((suggestions.length - (actualDeg / sliceDeg)) % suggestions.length);
+        result.textContent = "Your day suggestion: " + suggestions[index];
+        spinning = false;
+      }, 4000);
+    });
+
+    // Home Page → Wheel Page
+    function goToWheel() {
+      const name = document.getElementById("name").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+
+      if (name === "" || phone === "") {
+        alert("Please enter both name and phone number.");
+        return;
+      }
+
+      document.getElementById("homePage").style.display = "none";
+      document.getElementById("wheelPage").style.display = "flex";
+
+      welcome.textContent = `Hello ${name}! Ready to spin your day? 🎉`;
+    }
+  </script>
+</body>
+</html>
